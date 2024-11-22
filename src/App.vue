@@ -1,58 +1,87 @@
 <script setup>
-import { reactive } from 'vue';
+import { reactive, watch } from 'vue';
+import Cabecalho from './components/cabecalho.vue';
+import Buttons from './components/buttons.vue';
+import Inputs from './components/inputs.vue';
+import Resultado from './components/resultado.vue';
 
+// Estado reativo para os dados
 const estado = reactive({
   num1: null,
   num2: null,
+  operacao: null,
   resultado: null,
 });
 
+// Função para calcular automaticamente
+const calcula = () => {
+  const num1 = Number(estado.num1);
+  const num2 = Number(estado.num2);
+
+  // Verifica se os números são válidos antes de calcular
+  if (isNaN(num1) || isNaN(num2)) {
+    estado.resultado = 'Insira números válidos';
+    return;
+  }
+
+  // Realiza a operação com base na escolha do usuário
+  switch (estado.operacao) {
+    case 'adicao':
+      estado.resultado = num1 + num2;
+      break;
+    case 'subtracao':
+      estado.resultado = num1 - num2;
+      break;
+    case 'divisao':
+      estado.resultado = num2 !== 0 ? num1 / num2 : 'Erro: divisão por zero';
+      break;
+    case 'multiplicacao':
+      estado.resultado = num1 * num2;
+      break;
+    default:
+      estado.resultado = 'Escolha uma operação';
+  }
+};
+
+// Observa mudanças nos valores e recalcula automaticamente
+watch(() => [estado.num1, estado.num2, estado.operacao], calcula);
 </script>
 
 <template>
   <div class="container">
-    <header class="header p-5 mb-3 mt-4">
-      <h1>Calculadora Aritmética</h1>
-      <p>
-        Por favor escolha a função desejada.
-      </p>
-    </header>
+    <Cabecalho />
     <div class="calc">
-      <div class="btns">
-        <button class="btn btn-primary">Soma</button>
-        <button class="btn btn-primary">Subtração</button>
-        <button class="btn btn-primary">Divisão</button>
-        <button class="btn btn-primary">Multiplicação</button>
-      </div>
-      <form>
-        <div class="row">
-          <div class="col">
-            <label>Digite o <b>primeiro</b> numero no campo abaixo:</label> <br>
-            <input type="number" placeholder="Digite um número" class="form-control mb-2">
-            <label>Digite o <b>segundo</b> numero no campo abaixo:</label> <br>
-            <input type="number" placeholder="Digite um número" class="form-control mb-5">
-          </div>
-        </div>
-      </form>
+      <Buttons :operacao="estado.operacao" @escolher-operacao="estado.operacao = $event" />
+      <Inputs :valores="estado" />
+      <Resultado :resultado="estado.resultado" />
     </div>
   </div>
 </template>
 
 <style scoped>
-
 .container {
-  background-color: #000;
-  color: #fff;
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 20px;
+  background: #186c73;
+  color: white;
+  border-radius: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.btns {
-  margin: 8px 0;
+.calc {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.btn {
-  margin: 8px;
-}
+@media (max-width: 768px) {
+  .container {
+    padding: 15px;
+  }
 
+  .calc {
+    gap: 15px;
+  }
+}
 </style>
