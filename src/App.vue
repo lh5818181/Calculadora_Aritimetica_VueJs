@@ -1,11 +1,9 @@
 <script setup>
 import { reactive, watch } from 'vue';
 import Cabecalho from './components/cabecalho.vue';
-import Buttons from './components/buttons.vue';
 import Inputs from './components/inputs.vue';
 import Resultado from './components/resultado.vue';
 
-// Estado reativo para os dados
 const estado = reactive({
   num1: null,
   num2: null,
@@ -13,37 +11,41 @@ const estado = reactive({
   resultado: null,
 });
 
-// Função para calcular automaticamente
 const calcula = () => {
   const num1 = Number(estado.num1);
   const num2 = Number(estado.num2);
 
-  // Verifica se os números são válidos antes de calcular
   if (isNaN(num1) || isNaN(num2)) {
     estado.resultado = 'Insira números válidos';
     return;
   }
 
-  // Realiza a operação com base na escolha do usuário
+  let resultado;
   switch (estado.operacao) {
     case 'adicao':
-      estado.resultado = num1 + num2;
+      resultado = num1 + num2;
       break;
     case 'subtracao':
-      estado.resultado = num1 - num2;
+      resultado = num1 - num2;
       break;
     case 'divisao':
-      estado.resultado = num2 !== 0 ? num1 / num2 : 'Erro: divisão por zero';
+      resultado = num2 !== 0 ? num1 / num2 : 'Erro: divisão por zero';
       break;
     case 'multiplicacao':
-      estado.resultado = num1 * num2;
+      resultado = num1 * num2;
       break;
     default:
-      estado.resultado = 'Escolha uma operação';
+      resultado = 'Escolha uma operação';
+  }
+
+  if (typeof resultado === 'number' && !isNaN(resultado)) {
+    estado.resultado = Math.round(resultado); // Arredonda para o número inteiro mais próximo
+  } else {
+    estado.resultado = resultado;
   }
 };
 
-// Observa mudanças nos valores e recalcula automaticamente
+// Observa mudanças nos valores ou operação e recalcula automaticamente
 watch(() => [estado.num1, estado.num2, estado.operacao], calcula);
 </script>
 
@@ -51,7 +53,16 @@ watch(() => [estado.num1, estado.num2, estado.operacao], calcula);
   <div class="container">
     <Cabecalho />
     <div class="calc">
-      <Buttons :operacao="estado.operacao" @escolher-operacao="estado.operacao = $event" />
+      <div class="select-container">
+        <label for="operacao">Escolha uma operação:</label>
+        <select id="operacao" v-model="estado.operacao" class="select-operacao">
+          <option disabled value="">Selecione</option>
+          <option value="adicao">Adição</option>
+          <option value="subtracao">Subtração</option>
+          <option value="divisao">Divisão</option>
+          <option value="multiplicacao">Multiplicação</option>
+        </select>
+      </div>
       <Inputs :valores="estado" />
       <Resultado :resultado="estado.resultado" />
     </div>
@@ -75,13 +86,35 @@ watch(() => [estado.num1, estado.num2, estado.operacao], calcula);
   gap: 20px;
 }
 
+.select-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.select-operacao {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  background: #005f5f;
+  color: white;
+}
+
+.select-operacao:focus {
+  outline: none;
+  border-color: #00ffbf;
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 15px;
   }
 
-  .calc {
-    gap: 15px;
+  .select-operacao {
+    font-size: 14px;
+    padding: 8px;
   }
 }
 </style>

@@ -1,4 +1,4 @@
-<template>
+    <template>
         <div class="inputs">
         <label>Digite o primeiro número:</label>
         <input type="number" v-model.number="valores.num1" placeholder="Número 1" />
